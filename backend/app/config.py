@@ -100,28 +100,89 @@ class Settings:
         # "demo" (default) → SQLite demo store via DemoStoreAdapter;
         # "shopify_simulated" → SAME demo data, Shopify-shaped payloads
         # via SimulatedShopifyAdapter. Unknown values fall back to "demo".
-        # The real ShopifyAdapter is NOT selectable here: it is only
-        # constructed explicitly when SHOPIFY_* env vars are set.
+        # "shopify" → real Shopify Admin API via ShopifyAdapter;
+        # "woocommerce" → real WooCommerce REST API via WooCommerceAdapter;
+        # "etsy" → real Etsy Open API v3 via EtsyAdapter;
+        # "ebay" → real eBay Sell APIs via EbayAdapter;
+        # "tiktok_shop" → real TikTok Shop Open Platform via TikTokShopAdapter.
+        # If the selected real backend is not configured, the factory
+        # silently falls back to "demo" (see integrations/__init__.py).
         raw_backend = (_env("STORE_BACKEND", "demo") or "demo").strip().lower()
         self.store_backend: str = (
             raw_backend
-            if raw_backend in {"demo", "shopify_simulated"}
+            if raw_backend in {"demo", "shopify_simulated", "shopify", "woocommerce", "etsy", "ebay", "tiktok_shop"}
             else "demo"
         )
-        # Shopify (Phase 9 skeleton — SIMULATED until a dev store exists).
+        # TikTok Shop Open Platform (real adapter — needs Partner Center
+        # app + OAuth token). Server-side ONLY; never frontend, never
+        # committed.
+        self.tiktok_shop_app_key: str | None = _env(
+            "TIKTOK_SHOP_APP_KEY", None
+        )
+        self.tiktok_shop_app_secret: str | None = _env(
+            "TIKTOK_SHOP_APP_SECRET", None
+        )
+        self.tiktok_shop_access_token: str | None = _env(
+            "TIKTOK_SHOP_ACCESS_TOKEN", None
+        )
+        self.tiktok_shop_shop_id: str | None = _env(
+            "TIKTOK_SHOP_SHOP_ID", None
+        )
+        self.tiktok_shop_base_url: str = (
+            _env(
+                "TIKTOK_SHOP_BASE_URL",
+                "https://open-api.tiktokglobalshop.com",
+            )
+            or "https://open-api.tiktokglobalshop.com"
+        )
+        self.tiktok_shop_webhook_secret: str | None = _env(
+            "TIKTOK_SHOP_WEBHOOK_SECRET", None
+        )
+        # Shopify (real Admin API adapter — needs a custom app + token).
         # Server-side ONLY; never frontend, never committed.
         self.shopify_shop_domain: str | None = _env(
             "SHOPIFY_SHOP_DOMAIN", None
         )
-        self.shopify_admin_api_token: str | None = _env(
-            "SHOPIFY_ADMIN_API_TOKEN", None
+        # Primary: SHOPIFY_ADMIN_TOKEN; legacy SHOPIFY_ADMIN_API_TOKEN
+        # is still accepted for backward compatibility.
+        self.shopify_admin_api_token: str | None = (
+            _env("SHOPIFY_ADMIN_TOKEN", None)
+            or _env("SHOPIFY_ADMIN_API_TOKEN", None)
         )
         self.shopify_api_version: str = (
             _env("SHOPIFY_API_VERSION", "2026-10") or "2026-10"
         )
+        # WooCommerce (real REST API adapter — needs REST API keys).
+        # Server-side ONLY; never frontend, never committed.
+        self.woocommerce_shop_url: str | None = _env(
+            "WOOCOMMERCE_SHOP_URL", None
+        )
+        self.woocommerce_consumer_key: str | None = _env(
+            "WOOCOMMERCE_CONSUMER_KEY", None
+        )
+        self.woocommerce_consumer_secret: str | None = _env(
+            "WOOCOMMERCE_CONSUMER_SECRET", None
+        )
+        self.woocommerce_webhook_secret: str | None = _env(
+            "WOOCOMMERCE_WEBHOOK_SECRET", None
+        )
         self.shopify_webhook_secret: str | None = _env(
             "SHOPIFY_WEBHOOK_SECRET", None
         )
+        # Etsy (Open API v3 — real adapter needs API key + shop ID;
+        # receipts additionally need an OAuth token).
+        # Server-side ONLY; never frontend, never committed.
+        self.etsy_api_key: str | None = _env("ETSY_API_KEY", None)
+        self.etsy_shop_id: str | None = _env("ETSY_SHOP_ID", None)
+        self.etsy_oauth_token: str | None = _env("ETSY_OAUTH_TOKEN", None)
+        # eBay (Sell APIs — client-credentials flow or ready OAuth token).
+        # Server-side ONLY; never frontend, never committed.
+        self.ebay_client_id: str | None = _env("EBAY_CLIENT_ID", None)
+        self.ebay_client_secret: str | None = _env("EBAY_CLIENT_SECRET", None)
+        self.ebay_marketplace_id: str = (
+            _env("EBAY_MARKETPLACE_ID", "EBAY_DE") or "EBAY_DE"
+        )
+        self.ebay_oauth_token: str | None = _env("EBAY_OAUTH_TOKEN", None)
         raw_origins = _env(
             "CORS_ORIGINS",
             "http://localhost:3000,http://127.0.0.1:3000",
