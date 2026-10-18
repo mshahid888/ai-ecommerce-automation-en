@@ -157,6 +157,33 @@ CREATE TABLE IF NOT EXISTS shopify_webhook_events (
 
 CREATE INDEX IF NOT EXISTS idx_shopify_webhook_topic ON shopify_webhook_events(topic);
 
+-- WooCommerce webhook delivery log for idempotency. WooCommerce may
+-- redeliver the same webhook; X-WC-Webhook-Delivery-ID is the primary
+-- key so duplicates are acknowledged without reprocessing.
+-- NOT wiped by the demo reset (integration evidence, like the audit log).
+CREATE TABLE IF NOT EXISTS woocommerce_webhook_events (
+    delivery_id TEXT PRIMARY KEY,
+    topic       TEXT,
+    received_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_woocommerce_webhook_topic ON woocommerce_webhook_events(topic);
+
+-- TikTok Shop webhook delivery log for idempotency. TikTok may
+-- deliver the same notification multiple times; tts_notification_id
+-- is the primary key so duplicates are acknowledged without
+-- reprocessing. NOT wiped by the demo reset (integration evidence,
+-- like the audit log).
+CREATE TABLE IF NOT EXISTS tiktok_shop_webhook_events (
+    notification_id TEXT PRIMARY KEY,
+    topic           TEXT,
+    shop_id         TEXT,
+    received_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_tiktok_shop_webhook_topic ON tiktok_shop_webhook_events(topic);
+
+
 -- Phase 7: daily real-LLM usage counters for the AI spending cap
 -- (LLM_DAILY_REQUEST_CAP). Mock/stub calls are never counted.
 CREATE TABLE IF NOT EXISTS ai_usage (

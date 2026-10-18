@@ -1,9 +1,10 @@
-"""Real Shopify adapter skeleton (Phase 9) — NOT connected, NOT tested live.
+"""Real Shopify Admin API adapter (Phase 9b) — fully implemented, tested offline.
 
 ``ShopifyAdapter`` implements ``StoreIntegration`` against the Shopify
-Admin API (REST for orders/products, GraphQL noted below). It is a
-SKELETON: every method has the documented request/response mapping, but
-no Shopify dev store exists, so no live call has ever been made.
+Admin API (REST for orders/products, GraphQL noted below). Every method is implemented against the documented request/response
+mapping. All HTTP traffic is mocked in tests — no live Shopify call has
+ever been made; none is made without a configured store
+(SHOPIFY_SHOP_DOMAIN + SHOPIFY_ADMIN_TOKEN).
 
 Docs reference (checked 2026-10-09):
 - API versioning: https://shopify.dev/docs/api/usage/versioning
@@ -54,7 +55,7 @@ Mapping caveats (to verify against a real dev store in Phase 9b):
   untested until a dev store exists.
 - Shopify has no order ETA field: ``eta_date`` is always None from
   this adapter — the pipeline omits the delivery estimate honestly.
-- Product attributes (spülmaschinengeeignet, etc.) have no Shopify
+- Product attributes (dishwasher-safe, etc.) have no Shopify
   equivalent in the basic product payload: ``attributes_json`` is {}
   and the pipeline answers honestly ("information not available").
 
@@ -114,8 +115,9 @@ def _price_to_cents(price: Any) -> int | None:
 
 
 class ShopifyAdapter(StoreIntegration):
-    """SKELETON — Shopify Admin API backend. Never constructed without the
-    ``SHOPIFY_SHOP_DOMAIN`` + ``SHOPIFY_ADMIN_API_TOKEN`` env vars."""
+    """Shopify Admin API backend. Never constructed without the
+    ``SHOPIFY_SHOP_DOMAIN`` + ``SHOPIFY_ADMIN_TOKEN`` env vars (missing
+    vars → ``IntegrationConfigError``; the factory falls back to demo)."""
 
     def __init__(self, settings: "Settings", store_id: str) -> None:
         super().__init__(store_id)
@@ -123,18 +125,20 @@ class ShopifyAdapter(StoreIntegration):
         token = settings.shopify_admin_api_token or ""
         if not shop_domain or not token:
             raise IntegrationConfigError(
-                "ShopifyAdapter needs SHOPIFY_SHOP_DOMAIN and "
-                "SHOPIFY_ADMIN_API_TOKEN (server-side env only). "
-                "Create a free Shopify Partner dev store + custom app with "
-                "scopes read_orders, read_products, read_fulfillments, "
-                "then put the values in the backend .env (never commit "
-                "them). See docs/SHOPIFY.md."
+                "Shopify adapter not configured: SHOPIFY_SHOP_DOMAIN "
+                "and SHOPIFY_ADMIN_TOKEN are missing (server-side env vars, "
+                "never commit them). The older variable "
+                "SHOPIFY_ADMIN_API_TOKEN is also accepted. "
+                "Create a free Shopify Partner dev store + custom app "
+                "(Scopes: read_orders, read_products, read_fulfillments), "
+                "put the Admin API token in the backend .env. "
+                "See docs/SHOPIFY.md and docs/SHOPIFY-ADAPTER.md."
             )
         shop_domain = re.sub(r"^https?://", "", shop_domain).rstrip("/").lower()
         if "myshopify.com" not in shop_domain:
             raise IntegrationConfigError(
                 f"SHOPIFY_SHOP_DOMAIN looks wrong: {shop_domain!r}. "
-                "Use the store's myshopify.com domain, e.g. "
+                "Use the myshopify.com domain of the store, e.g. "
                 "'muster-shop.myshopify.com'."
             )
         self.shop_domain = shop_domain
@@ -215,20 +219,37 @@ class ShopifyAdapter(StoreIntegration):
         time.sleep(delay)
 
     # -- mapping helpers --------------------------------------------------
+    #: Shopify ``fulfillment_status`` → canonical status. Shopify REST
+    #: exposes no reliable "delivered" signal and no "delayed" concept, so
+    #: this adapter never emits "delivered"/"delayed" — it answers honestly
+    #: instead of guessing (``eta_date`` is always None).
+    #:
+    #: | Shopify signal                  | canonical status |
+    #: |---------------------------------|------------------|
+    #: | order cancelled = true          | cancelled        |
+    #: | fulfillment_status = fulfilled  | shipped          |
+    #: | fulfillment_status = partial    | processing       |
+    #: | fulfillment_status = unfulfilled| processing       |
+    #: | fulfillment_status = restocked  | processing       |
+    #: | fulfillment_status = null/other | processing       |
+    SHOPIFY_FULFILLMENT_STATUS_MAP = {
+        "fulfilled": "shipped",
+        "partial": "processing",
+        "unfulfilled": "processing",
+        "restocked": "processing",
+    }
+
     @staticmethod
     def _map_order(shopify_order: dict[str, Any]) -> dict[str, Any]:
-        """Map a Shopify REST order to the canonical order dict.
-
-        Status mapping (see module caveats): cancelled → cancelled;
-        fulfilled → shipped; anything else → processing.
-        """
+        """Map a Shopify REST order to the canonical order dict
+        (status per SHOPIFY_FULFILLMENT_STATUS_MAP)."""
         name = str(shopify_order.get("name") or "").lstrip("#")
         if shopify_order.get("cancelled"):
             status = "cancelled"
-        elif shopify_order.get("fulfillment_status") == "fulfilled":
-            status = "shipped"
         else:
-            status = "processing"
+            status = ShopifyAdapter.SHOPIFY_FULFILLMENT_STATUS_MAP.get(
+                shopify_order.get("fulfillment_status"), "processing"
+            )
         return {
             "order_ref": name,
             "status": status,
