@@ -103,8 +103,27 @@ interface ErrorPayload {
   reply_de?: string;
 }
 
+// Requests time out after 25 s so a hung network can never leave the UI
+// stuck in a loading state (e.g. the chat send button staying disabled).
+const REQUEST_TIMEOUT_MS = 25000;
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_URL}${path}`, init);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, { ...init, signal: controller.signal });
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new ApiError(
+        0,
+        "The request timed out — please check your connection and try again.",
+      );
+    }
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
 
   if (!res.ok) {
     let payload: ErrorPayload | null = null;
