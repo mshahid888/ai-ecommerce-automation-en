@@ -2,7 +2,7 @@ import type { TimelineStep } from "@/lib/api";
 
 function badgeClass(status: string): string {
   if (status === "failed") return "bg-red-100 text-red-800";
-  if (status === "done") return "bg-emerald-100 text-emerald-800";
+  if (status === "done") return "bg-green-100 text-green-800";
   return "bg-slate-100 text-slate-700";
 }
 

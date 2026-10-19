@@ -80,7 +80,7 @@ export default function TicketDetailView({ id }: { id: string }) {
       <div>
         <Link
           href="/tickets"
-          className="text-sm font-medium text-slate-600 underline underline-offset-2"
+          className="text-sm font-medium text-blue-700 underline underline-offset-2"
         >
           ← Back to tickets
         </Link>
@@ -113,7 +113,7 @@ export default function TicketDetailView({ id }: { id: string }) {
       {!loading && backendDown && (
         <div
           role="alert"
-          className="rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 shadow-sm"
+          className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800 shadow-sm"
         >
           The backend is not reachable – the ticket cannot be displayed right
           now.
@@ -143,7 +143,7 @@ export default function TicketDetailView({ id }: { id: string }) {
                   className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                     ticket.status === "open"
                       ? "bg-amber-100 text-amber-800"
-                      : "bg-emerald-100 text-emerald-800"
+                      : "bg-green-100 text-green-800"
                   }`}
                 >
                   {statusLabel(ticket.status)}
@@ -223,7 +223,7 @@ export default function TicketDetailView({ id }: { id: string }) {
                         className={`mt-1 h-3 w-3 rounded-full ${
                           event.status === "failed"
                             ? "bg-red-500"
-                            : "bg-slate-700"
+                            : "bg-green-600"
                         }`}
                       />
                       {index < ticket.events.length - 1 && (

@@ -6,7 +6,7 @@ import { getTickets, type Ticket } from "@/lib/api";
 
 function statusBadgeClass(status: string): string {
   if (status === "open") return "bg-amber-100 text-amber-800";
-  if (status === "closed") return "bg-emerald-100 text-emerald-800";
+  if (status === "closed") return "bg-green-100 text-green-800";
   return "bg-slate-100 text-slate-700";
 }
 
@@ -82,7 +82,7 @@ export default function TicketsPage() {
           aria-pressed={onlyOpen}
           className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
             onlyOpen
-              ? "bg-slate-700 text-white"
+              ? "bg-blue-600 text-white"
               : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
           }`}
         >
@@ -99,7 +99,7 @@ export default function TicketsPage() {
       {!loading && backendDown && (
         <div
           role="alert"
-          className="rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 shadow-sm"
+          className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800 shadow-sm"
         >
           The backend is unavailable – tickets cannot be displayed right
           now.
@@ -150,7 +150,7 @@ export default function TicketsPage() {
                   <td className="px-4 py-3">
                     <Link
                       href={`/tickets/${ticket.id}`}
-                      className="font-mono font-medium text-slate-900 underline underline-offset-2"
+                      className="font-mono font-medium text-blue-700 underline underline-offset-2"
                     >
                       #{ticket.id}
                     </Link>
@@ -158,7 +158,7 @@ export default function TicketsPage() {
                   <td className="max-w-[280px] truncate px-4 py-3 text-slate-700">
                     <Link
                       href={`/tickets/${ticket.id}`}
-                      className="hover:underline"
+                      className="hover:text-blue-700 hover:underline"
                       title={ticket.summary ?? ticket.intent ?? ""}
                     >
                       {ticket.intent_label_de ?? ticket.intent ?? "–"}

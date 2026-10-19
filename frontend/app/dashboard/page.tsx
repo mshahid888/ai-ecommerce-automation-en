@@ -85,7 +85,7 @@ export default function DashboardPage() {
       {!loading && backendDown && (
         <div
           role="alert"
-          className="rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 shadow-sm"
+          className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800 shadow-sm"
         >
           The backend is unavailable – metrics cannot be displayed right
           now.
@@ -124,7 +124,7 @@ export default function DashboardPage() {
               (demo data) ·{" "}
               <Link
                 href="/tickets"
-                className="font-medium text-slate-700 underline underline-offset-2"
+                className="font-medium text-blue-700 underline underline-offset-2"
               >
                 View all tickets
               </Link>
@@ -144,7 +144,7 @@ export default function DashboardPage() {
               <div className="mt-4 rounded-xl border border-slate-200 bg-white px-4 py-8 text-center shadow-sm">
                 <p className="text-sm text-slate-600">
                   No conversations yet. Start a conversation on the{" "}
-                  <Link href="/" className="font-medium underline">
+                  <Link href="/" className="font-medium text-blue-700 underline">
                     chat page
                   </Link>
                   , to see the distribution.
@@ -168,7 +168,7 @@ export default function DashboardPage() {
                       className="mt-1 h-2.5 overflow-hidden rounded-full bg-slate-100"
                     >
                       <div
-                        className="h-full rounded-full bg-slate-700"
+                        className="h-full rounded-full bg-blue-600"
                         style={{
                           width: `${
                             maxIntentCount > 0
@@ -231,36 +231,36 @@ export default function DashboardPage() {
               Security &amp; privacy (Demo)
             </h2>
             <div className="mt-3 rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-700 shadow-sm">
-              <ul className="list-disc space-y-2 pl-5">
-                <li>
+              <ul className="list-none space-y-2 pl-0">
+                <li className="flex items-start gap-2"><span aria-hidden="true" className="font-bold text-green-600">✓</span><span>
                   <span className="font-medium">Simulated data:</span>{" "}
                   All orders, products, and customers in this demo are
                   fictional. No real orders are processed, and no real
                   returns or refunds are executed.
-                </li>
-                <li>
+                </span></li>
+                <li className="flex items-start gap-2"><span aria-hidden="true" className="font-bold text-green-600">✓</span><span>
                   <span className="font-medium">No real payments:</span>{" "}
                   The demo does not request payment data and does not store
                   personal data of real customers.
-                </li>
-                <li>
+                </span></li>
+                <li className="flex items-start gap-2"><span aria-hidden="true" className="font-bold text-green-600">✓</span><span>
                   <span className="font-medium">Usage limits:</span>{" "}
                   Requests are limited per visitor (chat, read requests, and
                   demo reset). If the limit is exceeded, the backend responds
                   with HTTP&nbsp;429 and a wait time.
-                </li>
-                <li>
+                </span></li>
+                <li className="flex items-start gap-2"><span aria-hidden="true" className="font-bold text-green-600">✓</span><span>
                   <span className="font-medium">AI quota:</span> The number
                   of real AI requests per day is capped. When the quota is
                   exhausted, the demo rule engine answers — this is clearly
                   marked in the conversation.
-                </li>
-                <li>
+                </span></li>
+                <li className="flex items-start gap-2"><span aria-hidden="true" className="font-bold text-green-600">✓</span><span>
                   <span className="font-medium">Admin protection:</span>{" "}
                   Resetting the demo requires a server-side admin key.
                   Security-relevant events (e.g. failed admin attempts) are
                   recorded in an immutable audit log.
-                </li>
+                </span></li>
               </ul>
             </div>
           </section>

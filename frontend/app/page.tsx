@@ -168,7 +168,7 @@ export default function ChatPage() {
             onChange={(event) => setAdminKey(event.target.value)}
             placeholder="Admin key"
             autoComplete="off"
-            className="w-40 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200"
+            className="w-40 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
           />
           <button
             type="button"
@@ -184,7 +184,7 @@ export default function ChatPage() {
       {ticketNotice && (
         <p
           role="status"
-          className="rounded-lg border border-sky-300 bg-sky-50 px-4 py-2.5 text-sm font-medium text-sky-900"
+          className="rounded-lg border border-blue-300 bg-blue-50 px-4 py-2.5 text-sm font-medium text-blue-900"
         >
           {ticketNotice}
         </p>
@@ -218,7 +218,7 @@ export default function ChatPage() {
             {messages.map((message) =>
               message.role === "user" ? (
                 <div key={message.id} className="flex justify-end">
-                  <div className="max-w-[80%] rounded-2xl rounded-br-md bg-slate-900 px-4 py-2.5 text-sm text-white">
+                  <div className="max-w-[80%] rounded-2xl rounded-br-md bg-blue-600 px-4 py-2.5 text-sm text-white">
                     {message.text}
                   </div>
                 </div>
@@ -227,7 +227,7 @@ export default function ChatPage() {
                   <div
                     className={`max-w-[85%] rounded-2xl rounded-bl-md border px-4 py-2.5 text-sm ${
                       message.isErrorReply
-                        ? "border-amber-300 bg-amber-50 text-amber-900"
+                        ? "border-red-300 bg-red-50 text-red-800"
                         : "border-slate-200 bg-slate-50 text-slate-900"
                     }`}
                   >
@@ -287,7 +287,7 @@ export default function ChatPage() {
                     type="button"
                     onClick={() => handleExampleClick(question)}
                     disabled={loading}
-                    className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 transition-colors hover:border-slate-400 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 transition-colors hover:border-blue-400 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {question}
                   </button>
@@ -314,13 +314,13 @@ export default function ChatPage() {
                   placeholder="Type your message…"
                   disabled={loading}
                   autoComplete="off"
-                  className="w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200 disabled:opacity-60"
+                  className="w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 disabled:opacity-60"
                 />
               </div>
               <button
                 type="submit"
                 disabled={loading || input.trim().length === 0}
-                className="shrink-0 rounded-md bg-slate-900 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+                className="shrink-0 rounded-md bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Send
               </button>

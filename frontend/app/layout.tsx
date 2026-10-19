@@ -15,14 +15,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="h-full">
-      <body className="flex min-h-full flex-col bg-slate-50 font-sans text-slate-900 antialiased">
-        <header className="bg-slate-900">
+      <body className="flex min-h-full flex-col bg-white font-sans text-slate-900 antialiased">
+        <header className="bg-blue-700">
           <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
             <div>
               <p className="text-lg font-semibold tracking-tight text-white">
                 AI E-Commerce Automation
               </p>
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-blue-100">
                 Demo shop: Demo Shop GmbH
               </p>
             </div>
