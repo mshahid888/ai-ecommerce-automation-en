@@ -91,6 +91,7 @@ export default function ChatPage() {
     },
   ]);
   const [input, setInput] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [backendDown, setBackendDown] = useState(false);
   const [timeline, setTimeline] = useState<TimelineStep[]>([]);
@@ -108,12 +109,14 @@ export default function ChatPage() {
   }, [messages, loading]);
 
   async function sendMessage(raw: string) {
-    const text = raw.trim();
+    const live = inputRef.current?.value ?? raw;
+    const text = (live || raw).trim();
     if (!text || loading) return;
 
     setBackendDown(false);
     setMessages((prev) => [...prev, { id: makeId(), role: "user", text }]);
     setInput("");
+    if (inputRef.current) inputRef.current.value = "";
     setLoading(true);
 
     try {
@@ -162,6 +165,7 @@ export default function ChatPage() {
 
   function handleExampleClick(question: string) {
     setInput(question);
+    if (inputRef.current) inputRef.current.value = question;
     void sendMessage(question);
   }
 
@@ -395,7 +399,7 @@ export default function ChatPage() {
             <form
               onSubmit={(event) => {
                 event.preventDefault();
-                void sendMessage(input);
+                void sendMessage(inputRef.current?.value ?? input);
               }}
               className="flex items-center gap-2"
             >
@@ -406,7 +410,8 @@ export default function ChatPage() {
                 <input
                   id="chat-input"
                   type="text"
-                  value={input}
+                  ref={inputRef}
+                  defaultValue=""
                   onChange={(event) => setInput(event.target.value)}
                   placeholder="Type your message…"
                   disabled={loading}
@@ -416,7 +421,7 @@ export default function ChatPage() {
               </div>
               <button
                 type="submit"
-                disabled={loading || input.trim().length === 0}
+                disabled={loading}
                 aria-label="Send message"
                 className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow disabled:cursor-not-allowed disabled:opacity-50"
               >
