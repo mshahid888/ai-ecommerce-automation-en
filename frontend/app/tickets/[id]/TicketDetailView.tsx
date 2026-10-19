@@ -20,6 +20,45 @@ function statusLabel(status: string): string {
   return status;
 }
 
+function StatusPill({ status }: { status: string }) {
+  const dot =
+    status === "closed"
+      ? "bg-green-500"
+      : status === "open"
+        ? "bg-amber-500"
+        : "bg-slate-400";
+  const ring =
+    status === "closed"
+      ? "bg-green-50 text-green-800 ring-green-200"
+      : status === "open"
+        ? "bg-amber-50 text-amber-800 ring-amber-200"
+        : "bg-slate-100 text-slate-600 ring-slate-200";
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${ring}`}
+    >
+      <span className={`h-1.5 w-1.5 rounded-full ${dot}`} aria-hidden="true" />
+      {statusLabel(status)}
+    </span>
+  );
+}
+
+function PriorityPill({ priority }: { priority: string | null }) {
+  const ring =
+    priority === "high"
+      ? "bg-red-50 text-red-800 ring-red-200"
+      : priority === "low"
+        ? "bg-slate-100 text-slate-600 ring-slate-200"
+        : "bg-blue-50 text-blue-800 ring-blue-200";
+  return (
+    <span
+      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${ring}`}
+    >
+      {priorityLabel(priority)}
+    </span>
+  );
+}
+
 function priorityLabel(priority: string | null): string {
   if (priority === "high") return "High";
   if (priority === "normal") return "Normal";
@@ -36,7 +75,7 @@ function InfoRow({
 }) {
   return (
     <div className="flex flex-col gap-1 py-3 sm:flex-row sm:gap-6">
-      <dt className="w-44 shrink-0 text-sm font-medium text-slate-600">
+      <dt className="w-44 shrink-0 text-sm font-medium text-slate-500">
         {label}
       </dt>
       <dd className="text-sm text-slate-900">{children}</dd>
@@ -80,13 +119,21 @@ export default function TicketDetailView({ id }: { id: string }) {
       <div>
         <Link
           href="/tickets"
-          className="text-sm font-medium text-blue-700 underline underline-offset-2"
+          className="inline-flex items-center gap-1 text-sm font-medium text-slate-500 transition-colors hover:text-blue-700"
         >
-          ← Back to tickets
+          <span aria-hidden="true">←</span> Back to tickets
         </Link>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900">
-          Ticket #{id}
-        </h1>
+        <div className="mt-2 flex flex-wrap items-center gap-3">
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+            Ticket #{id}
+          </h1>
+          {!loading && !notFound && !backendDown && ticket && (
+            <div className="flex items-center gap-2">
+              <StatusPill status={ticket.status} />
+              <PriorityPill priority={ticket.priority} />
+            </div>
+          )}
+        </div>
         <p className="mt-1 text-sm text-slate-600">
           Support case with linked conversation and history –{" "}
           <span className="font-medium">Demo data</span>.
@@ -94,17 +141,19 @@ export default function TicketDetailView({ id }: { id: string }) {
       </div>
 
       {loading && (
-        <p role="status" className="text-sm text-slate-600">
-          Loading ticket …
-        </p>
+        <div className="animate-pulse rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" aria-hidden="true">
+          <div className="h-5 w-40 rounded bg-slate-100" />
+          <div className="mt-3 h-4 w-full rounded bg-slate-100" />
+          <div className="mt-2 h-4 w-3/4 rounded bg-slate-100" />
+        </div>
       )}
 
       {!loading && notFound && (
         <div
           role="alert"
-          className="rounded-xl border border-slate-200 bg-white px-4 py-8 text-center shadow-sm"
+          className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-10 text-center"
         >
-          <p className="text-sm text-slate-600">
+          <p className="text-sm font-medium text-slate-700">
             Ticket #{id} was not found.
           </p>
         </div>
@@ -113,7 +162,7 @@ export default function TicketDetailView({ id }: { id: string }) {
       {!loading && backendDown && (
         <div
           role="alert"
-          className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800 shadow-sm"
+          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 shadow-sm"
         >
           The backend is not reachable – the ticket cannot be displayed right
           now.
@@ -124,13 +173,13 @@ export default function TicketDetailView({ id }: { id: string }) {
         <>
           <section
             aria-label="Ticket summary"
-            className="rounded-xl border border-slate-200 bg-white shadow-sm"
+            className="rounded-2xl border border-slate-200 bg-white shadow-sm"
           >
-            <div className="divide-y divide-slate-200 px-5">
+            <div className="divide-y divide-slate-100 px-5">
               <InfoRow label="Issue">
-                {ticket.intent_label_de}
+                <span className="font-medium">{ticket.intent_label_de}</span>
                 {ticket.intent && (
-                  <span className="ml-2 font-mono text-xs text-slate-500">
+                  <span className="ml-2 font-mono text-xs text-slate-400">
                     ({ticket.intent})
                   </span>
                 )}
@@ -138,22 +187,8 @@ export default function TicketDetailView({ id }: { id: string }) {
               <InfoRow label="Summary">
                 {ticket.summary ?? "–"}
               </InfoRow>
-              <InfoRow label="Status">
-                <span
-                  className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                    ticket.status === "open"
-                      ? "bg-amber-100 text-amber-800"
-                      : "bg-green-100 text-green-800"
-                  }`}
-                >
-                  {statusLabel(ticket.status)}
-                </span>
-              </InfoRow>
-              <InfoRow label="Priority">
-                {priorityLabel(ticket.priority)}
-              </InfoRow>
               <InfoRow label="Order">
-                <span className="font-mono">
+                <span className="rounded-md bg-slate-100 px-2 py-0.5 font-mono text-[13px]">
                   {ticket.order_ref ? `#${ticket.order_ref}` : "–"}
                 </span>
               </InfoRow>
@@ -172,11 +207,11 @@ export default function TicketDetailView({ id }: { id: string }) {
           </section>
 
           <section aria-label="Linked conversation">
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold tracking-tight text-slate-900">
               Linked conversation
             </h2>
             {ticket.messages.length === 0 ? (
-              <p className="mt-2 text-sm text-slate-600">
+              <p className="mt-2 text-sm text-slate-500">
                 No messages yet.
               </p>
             ) : (
@@ -184,16 +219,22 @@ export default function TicketDetailView({ id }: { id: string }) {
                 {ticket.messages.map((message) => (
                   <li
                     key={message.id}
-                    className={`max-w-2xl rounded-xl border px-4 py-3 shadow-sm ${
+                    className={`max-w-2xl rounded-2xl border px-4 py-3 shadow-sm ${
                       message.role === "user"
-                        ? "border-slate-200 bg-white"
-                        : "border-slate-300 bg-slate-50"
+                        ? "border-blue-200 bg-blue-50/60"
+                        : "border-slate-200 bg-white"
                     }`}
                   >
-                    <p className="text-xs font-semibold text-slate-500">
+                    <p
+                      className={`text-xs font-semibold uppercase tracking-wide ${
+                        message.role === "user"
+                          ? "text-blue-700"
+                          : "text-slate-500"
+                      }`}
+                    >
                       {message.role === "user" ? "Customer" : "Assistant"}
                     </p>
-                    <p className="mt-1 whitespace-pre-wrap text-sm text-slate-800">
+                    <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-slate-800">
                       {message.content}
                     </p>
                   </li>
@@ -203,27 +244,27 @@ export default function TicketDetailView({ id }: { id: string }) {
           </section>
 
           <section aria-label="History">
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold tracking-tight text-slate-900">
               Event history
             </h2>
             <p className="mt-1 text-sm text-slate-600">
               All workflow steps actually executed in this conversation.
             </p>
             {ticket.events.length === 0 ? (
-              <p className="mt-2 text-sm text-slate-600">
+              <p className="mt-2 text-sm text-slate-500">
                 No events yet.
               </p>
             ) : (
-              <ol className="mt-3 space-y-0">
+              <ol className="mt-4 space-y-0">
                 {ticket.events.map((event, index) => (
-                  <li key={event.id} className="relative flex gap-4 pb-6">
+                  <li key={event.id} className="relative flex gap-4 pb-6 last:pb-0">
                     <div className="flex flex-col items-center">
                       <span
                         aria-hidden="true"
-                        className={`mt-1 h-3 w-3 rounded-full ${
+                        className={`mt-1 h-3 w-3 rounded-full ring-4 ${
                           event.status === "failed"
-                            ? "bg-red-500"
-                            : "bg-green-600"
+                            ? "bg-red-500 ring-red-100"
+                            : "bg-green-500 ring-green-100"
                         }`}
                       />
                       {index < ticket.events.length - 1 && (
